@@ -1,0 +1,85 @@
+# 
+# Configuracoes de ambiente shell para os scripts do GabiX
+#
+# Não execute este arquivo diretamente. Ele deve ser importado por cada script, 
+# quando necessario.
+#
+# Gabriel Marques
+# snortt@gmail.com
+#
+# Sex Nov  4 14:48:15 BRST 2011
+#
+
+# -----------------------------
+# Funções auxiliares
+# Funcao que imprime mensagens de sucesso
+printOK() {
+    echo -e "$@${TEXTO} ${ADERECO}[${ACERTO}OK${ADERECO}]${RESET}"
+}
+
+# Funcao que imprime mensagens de erro
+printError() {
+    echo -e "$@${TEXTO} ${ADERECO}[${ERRO}Erro${ADERECO}]${RESET}"
+}
+
+# Funcao que imprime mensagens de aviso
+printWarn() {
+    echo -e "$@${TEXTO} ${ADERECO}[${AVISO}Aviso${ADERECO}]${RESET}"
+}
+
+# Funcao que imprime mensagens
+# Se receber 1 em $1, imprime mensagem extendida ("*** TEXTO ***").
+# Do contrário, imprime mensagem comum ("TEXTO").
+printMsg() {
+    if [ "$1" == "1" ]; then
+        shift
+        echo -e "${ADERECO}*** ${TEXTO}$@${TEXTO} ${ADERECO}***${RESET}"
+    else
+        echo -e "${TEXTO}$@ ${RESET}"
+    fi 
+}
+
+# Detectar arquitetura configurada.
+# stat retorna uma string com aspas "especiais". Aqui temos duas formas de contornar o 
+# problema. Na primeira, pode-se fazer alguma magia com grep, sed, awk, etc. e assim 
+# filtrar miniroot_x86 e miniroot_x86_64.
+# A segunda maneira, um pouco mais simples, consiste em apenas colocar o teste de 
+# arquitetura 64bits em primeiro lugar! ;)
+#
+# Eu optei pela segunda. Caso deseje ter mais trabalho, mande bala e implemente a segunda! ;-)
+# 
+detect_arch() {
+	gabix_arch=$(stat miniroot | grep miniroot | tr -s " " | cut -d " " -f5 | sed -e s/\"//g) 
+
+	case $gabix_arch in
+		*miniroot_x86_64*)
+		    printMsg "Arquitetura configurada: ${AVISO}64${RESET} bits"
+			echo x86_64 > ${arch_control_file}
+			;;
+		*miniroot_x86*)
+			printMsg "Arquitetura configurada: ${AVISO}32${RESET} bits"
+			echo x86 > ${arch_control_file}
+			;;
+		*miniroot_armel*)
+		    printMsg "Arquitetura configurada: ${AVISO}ARM${RESET} (armel)"
+			echo armel > ${arch_control_file}
+			;;
+		*)
+			printMsg "Sem arquitetura configurada"
+			printMsg "Execute ${AVISO}make help${TEXTO} para mais informações"
+		 	echo "" > ${arch_control_file}
+			;;
+	esac
+
+	chmod 666 ${arch_control_file}
+}
+
+# Pausa
+# Função que insere pausa. Ajuda no debug.
+pausa() {
+	printWarn "${VERMELHOB}PAUSA!${RESET} Pressione ${VERDE}ENTER${RESET} para continuar."
+	read null
+}
+
+
+

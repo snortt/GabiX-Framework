@@ -1,0 +1,74 @@
+# Carrega as configurações globais.
+# 
+# NÃO altere a ordem de carregamento dos arquivos, a não ser que saiba
+# o que está fazendo. Você pode quebrar o sistema de construção do GabiX
+# ou ainda perder dados em seu computador.
+#
+
+CFG_DIR="${PWD}/etc"
+CORES_RC="${CFG_DIR}/cores.rc"
+CONFIGS_RC="${CFG_DIR}/configs.rc"
+GABIX_STUFF_RC="${CFG_DIR}/gabix_stuff.rc"
+ARM_STUFF_RC="${CFG_DIR}/arm_stuff.rc"
+GRUB_STUFF_RC="${CFG_DIR}/grub_stuff.rc"
+ISOLINUX_STUFF_RC="${CFG_DIR}/isolinux_stuff.rc"
+STRIP_STUFF_RC="${CFG_DIR}/strip_stuff.rc"
+KERNEL_STUFF_RC="${CFG_DIR}/kernel_stuff.rc"
+LOCALES_STUFF_RC="${CFG_DIR}/locales_stuff.rc"
+MINIROOT_STUFF_RC="${CFG_DIR}/miniroot_stuff.rc"
+FUNCOES_RC="${CFG_DIR}/funcoes.rc"
+
+if [ -f ${CORES_RC} ]; then 
+	. ${CORES_RC}
+fi
+
+# Lê as configurações do usuário
+if [ -f ${CONFIGS_RC} ]; then 
+	. ${CONFIGS_RC}
+fi
+
+# Carrega as configurações específicas ao sisteam de construção do GabiX
+if [ -f ${GABIX_STUFF_RC} ]; then 
+	. ${GABIX_STUFF_RC}
+fi
+
+# Configurações específicas para a plataforma ARM
+if [ -f ${ARM_STUFF_RC} ]; then 
+	. ${ARM_STUFF_RC}
+fi
+
+# Configurações específicas para x86 e x86_64
+if [ -f ${GRUB_STUFF_RC} ]; then 
+	. ${GRUB_STUFF_RC}
+fi
+if [ -f ${ISOLINUX_STUFF_RC} ]; then 
+	. ${ISOLINUX_STUFF_RC}
+fi
+
+# Configurações para a ferramenta de stripping de binários
+if [ -f ${STRIP_STUFF_RC} ]; then 
+	. ${STRIP_STUFF_RC}
+fi
+
+# Configurações para o kernel do GabiX
+if [ -f ${KERNEL_STUFF_RC} ]; then 
+	. ${KERNEL_STUFF_RC}
+fi
+
+# Configurações referentes aos idiomas e zonas do sistema
+if [ -f ${LOCALES_STUFF_RC} ]; then 
+	. ${LOCALES_STUFF_RC}
+fi
+
+# Configurações específicas para a construção do miniroot
+if [ -f ${MINIROOT_STUFF_RC} ]; then 
+	. ${MINIROOT_STUFF_RC}
+fi
+
+# Funções usadas por todo o sistema de construção e suas ferramentas
+if [ -f ${FUNCOES_RC} ]; then 
+	. ${FUNCOES_RC}
+fi
+
+
+

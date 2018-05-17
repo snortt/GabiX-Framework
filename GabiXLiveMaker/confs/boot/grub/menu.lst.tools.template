@@ -1,0 +1,41 @@
+# Menu de teste de memória
+#
+# Gabriel Marques
+# gabrielm@lncc.br
+#
+# Qua Jun 29 12:47:20 BRT 2011
+#
+
+# Item de menu:
+default 3
+
+# Tempo antes de iniciar a entrada selecionada acima.
+timeout 7
+
+# Item de menu: 0
+title [ __NOMESTR__ Live ]
+configfile (cd)/boot/grub/menu.lst
+
+# Item de menu: 1
+title [ Boot local ]
+configfile (cd)/boot/grub/menu.lst.local
+
+# Item de menu: 2
+title [ Ferramentas ]
+configfile (cd)/boot/grub/menu.lst.tools
+
+# Item de menu: 3
+title .   __NOMESTR__ - Shell 
+kernel /boot/vmlinuz-__VERSAO__ selinux=0 vga=__VGASTR__ quiet shell modulos="vfat "
+initrd /boot/initrd-__VERSAO__
+
+# Item de menu: 4
+title .   Teste de memoria
+kernel (cd)/boot/memtest.bin
+
+# Se desejar incluir um instalador do Debian no DVD, descomente as linhas abaixo
+# e faça o mesmo nos arquivos menu.lst.* adicionais.
+# Item de menu: 5
+#title [ Instalar Debian ]
+#configfile (cd)/boot/grub/menu.lst.installdeb
+

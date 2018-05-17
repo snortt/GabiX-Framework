@@ -1,0 +1,24 @@
+# Utilizado pelo script de limpeza de diretório pré-criação da imagem SquashFS
+# Aqui estão os locales (suporte a idiomas) que serão removidos da distribuição, 
+# antes de criar o arquivo SquashFS
+LOCALES_TO_WIPE="af am an ang ar ara as ast az az_IR be be@latin bg bn bn_IN br 
+                 bs byn ca ca_ES ca@valencia crh cs cy da de de_AT de_DE dz el 
+                 en en_AU en@boldquot en_CA en_GB en_NZ en@quot en@shaw en_US 
+                 en_US@piglatin eo es es_AR es_ES es_MX et et_EE eu fa fi fo fr 
+                 fr_FR ga gez gl gu haw he hi hr hu hy ia id io is it it_IT ja 
+                 ja_JP ka kk km kn ko kok ko_KR ku ky la lg li lt 
+                 lv mai mg mi mk ml mn mr ms mt my nb nb_NO nds ne nl nn no nso 
+                 oc or pa pl ps pt pt_PT rm ro ru ru_RU rw si sk sl so sq 
+                 sr sr@ije sr@latin sr@Latn sv sw ta te tg th ti tig tk tl tr tt 
+                 ug uk uk_UA ur ur_PK uz uz@cyrillic ve vi wa wal wo xh yi zh_CN 
+                 zh_HK zh_TW zu"
+
+# Aqui estão os fuso-horários que serão removidos da distribuição, antes de criar o arquivo SquashFS
+ZONES_TO_WIPE="Africa America Antarctica Arctic Asia Atlantic Australia Canada
+			   CET Chile CST6CDT Cuba EET Egypt Eire EST EST5EDT Etc Europe
+			   Factory GB GB-Eire GMT GMT0 GMT-0 GMT+0 Greenwich Hongkong HST
+			   Iceland Indian Iran iso3166.tab Israel Jamaica Japan Kwajalein
+			   Libya localtime MET Mexico Mideast MST MST7MDT Navajo NZ NZ-CHAT
+			   Pacific Poland Portugal PRC PST8PDT right ROC ROK
+			   Singapore SystemV Turkey UCT Universal US UTC WET W-SU Zulu"
+

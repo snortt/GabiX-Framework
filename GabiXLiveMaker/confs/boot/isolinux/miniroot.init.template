@@ -1,0 +1,141 @@
+#!/bin/sh
+#
+# Init para miniroot baseado em busybox (GRUB)
+#
+# Gabriel Marques
+# snortt@gmail.com 
+#
+# Qua Abr  6 10:02:17 BRT 2011
+#
+
+# Carrega o arquivo de configuracoes
+if [ -f /etc/funcoes.rc ]; then
+    . /etc/funcoes.rc 
+fi
+
+#
+# ------------------------------------------------------------------------------
+# Aqui comeca a magica
+# ---------------------
+# Alo, pessoal!
+printMsg " "
+printMsg "${ADERECO}-------------------------------------------------"
+printMsg "${FORTE}*** ${ACERTO}Bem-vindo ao ${AVISO}__NOMESTR__ ${FORTE}***"
+printMsg "${ADERECO}-------------------------------------------------"
+
+printMsg " "
+printMsg 1 "Criando sistema de arquivos para dispositivos"
+(
+	mount -t tmpfs -o size=__TMPFS_SIZE__,mode=__TMPFS_MODE__ tmpfs /dev
+	mkdir /dev/pts
+	mount -t devpts devpts /dev/pts
+) && printOK || printError
+
+printMsg " "
+printMsg 1 "Criando nodes especiais"
+mknod -m 660 /dev/console c 5 1 && printOK "${MAGENTA}Console :: " || printError
+mknod -m 660 /dev/null c 1 3 && printOK "${MAGENTA}Null :: " || printError
+
+printMsg " "
+printMsg 1 "Sistemas de arquivos do kernel"
+(mount -t proc none /proc && printOK "${MAGENTA}proc") || printError
+(mount -t sysfs none /sys && printOK "${MAGENTA}sys") || printError
+
+printMsg " "
+printMsg 1 "Habilitando mdev"
+(echo -e  "/sbin/mdev" > /proc/sys/kernel/hotplug && printOK "${MAGENTA}kernel hotplug :: ") || printError
+
+printMsg " "
+printMsg 1 "Criando dispositivos"
+(mdev -s && printOK "${MAGENTA}Dispositivos" || printError)
+
+printMsg " "
+printMsg 1 "Criando lock"
+(mkdir -p /var/lock && printOK "${MAGENTA}lock" ) || printError
+
+printMsg " "
+printMsg 1 "Criando dependencias"
+(depmod && printOK "${MAGENTA}Dependencias" || printError)
+
+# Armazena a linha de comando passada para o kernel
+CMDLINE=$(cat /proc/cmdline)
+
+# Caso precise de uma porta serial
+#printMsg "Ajustando porta serial"
+#(stty -F /dev/ttyS0 -raw -echo 38400 && printOK) || printError
+
+printMsg " "
+printMsg 1 "Reduzindo ruidos do kernel"
+(echo 0 > /proc/sys/kernel/printk && printOK) || printError
+
+# Carrega modulos do kernel
+load_modules $MODULES
+
+printMsg " "
+printMsg 1 "Procurando unidade de CD-ROM"
+find_cdrom
+
+# Macete feio, para ficar mais bonito! ;-)
+printMsg " "
+
+# Daqui pra frente, uma vez que o CD-ROM tenha sido localizado e montado, qualquer erro sera fatal para 
+# o processo de carga do sistema final. Assim, qualquer problema escreve 1 no arquivo de erro e faz com que o 
+# sistema jogue a inicializacao pela janela e carregue um shell.
+#
+if [ "$found_cd" -eq 0 ]; then
+	printError "${CIANO}CD-ROM :: "
+	echo "1" > $ERRFILE
+fi
+
+# Aqui precisamos verificar se foi solicitado um BOOT em raiz alternativa (local)
+check_root
+
+# E tambem se foi solicitado um shell
+# Vamos pedir também para que seja feita a montagem das imagens squashfs.
+check_shell "monta_squashes"
+
+#
+# Caso um shell não tenha sido solicitado, continuamos a carregar o sistema ...
+#
+# Vamos montar uma area dinamica para garantir escrita no sistema de arquivos
+printMsg " "
+printMsg 1 "Montando area dinamica"
+(mount -t tmpfs tmpfs /dynamic > /dev/null 2>&1 && printOK) || (echo "1" > $ERRFILE && printError)
+
+# Realiza as montagens das imagens SQUASHFS
+montar_squashes
+
+# Caso um HOME local tenha sido especificado, use-o no sistema live
+check_home "static"
+
+# Agora vamos unir a area estatica (RO) com a dinamica (RW)
+unir_tudo
+
+# Qual o tipo de configuracao de rede foi solicitado na linha de inicializacao?
+check_ip_config
+
+# Tenta executar o sistema real.
+if grep 0 $ERRFILE > /dev/null 2>&1; then
+    # So moveremos o proc e sys quando nao houver erros
+    printMsg " "
+    printMsg 1 "Movendo sistemas de arquivos virtuais"
+    move_fs "/sys" "/union/sys"
+    move_fs "/proc" "/union/proc"  
+	move_fs "/dev" "/union/dev" 
+    mkdir -p /union/run /var/run/
+    
+    # Finalmente, vamos tentar trocar a raiz para o novo sistema e executar o init real.
+    printMsg " "
+    printMsg 1 "${AVISO}Tentando trocar raiz de lugar"
+    printMsg " "
+    printMsg 1 "${ACERTO}Iniciando"
+    exec switch_root -c /dev/console /union /sbin/init 2> /dev/null
+else 
+    printMsg " "
+    printMsg 1 "${ERRO}Erro ao tentar iniciar Sistema!"
+	printMsg 1 "${ERRO}Executando Shell interativo. :-("
+    exec_shell 
+fi
+
+
+

@@ -1,0 +1,11 @@
+# Configurações para o strip (veja o LEIAME.txt antes de usar isso!)
+# Estripa tudo!
+#STRIP_OPTS="--strip-all --strip-unneeded --discard-all --discard-locals --verbose -R .comment -R .note -R .note.ABI-tag"
+# Estripa quase tudo ;-)
+STRIP_OPTS="--strip-unneeded --discard-all --discard-locals --verbose -R .comment -R .note -R .note.ABI-tag"
+STRIP_BIN_STR="executable"
+STRIP_LIB_STR="shared object"
+STRIP_FILE_TYPE="ELF"
+STRIP_BIN_DIRS="bin sbin usr/bin usr/sbin usr/local/bin usr/local/sbin opt"
+STRIP_LIB_DIRS="lib usr/lib usr/local/lib opt"
+

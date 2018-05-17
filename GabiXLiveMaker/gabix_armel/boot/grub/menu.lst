@@ -1,0 +1,57 @@
+# Menu principal para o GRUB
+#
+# Gabriel Marques
+# gabrielm@lncc.br
+#
+# Qua Jun 29 12:41:39 BRT 2011
+
+# Lembre-se de que a entrada [0] é o seu title [ GabiX LiveMaker Live ] ;-)
+# Assim, a entrada [1] é o primeiro item dentro de [ GabiX LiveMaker Live ]
+
+# Item de menu:
+default 1
+
+# Tempo antes de iniciar a entrada selecionada acima.
+timeout 7
+
+# Se desejar usar menu console
+#foreground = FFFFFF
+#background = 000000
+color dark-gray/black white/black
+
+# Se desejar usar menu gráfico
+gfxmenu (cd)/boot/grub/message
+
+# Item de menu: 0
+title [ GabiX LiveMaker Live ]
+configfile (cd)/boot/grub/menu.lst
+
+# Item de menu: 1
+title . GabiX LiveMaker
+kernel /boot/vmlinuz-2.6.39.1-gabix selinux=0 ip_config="dhcp " vga=791 quiet modulos="vfat " 
+initrd /boot/initrd-2.6.39.1-gabix
+
+# Item de menu: 2
+#title . GabiX LiveMaker - IP Estatico
+#kernel /boot/vmlinuz-2.6.39.1-gabix selinux=0 ip_config="static 10.0.0.1 255.0.0.0 10.0.0.100 10.0.0.254" vga=791 quiet modulos="vfat " 
+#initrd /boot/initrd-2.6.39.1-gabix
+
+# Item de menu: 3
+title . GabiX LiveMaker - Modo seguro
+kernel /boot/vmlinuz-2.6.39.1-gabix noapic acpi=off apm=power-off selinux=0 vga=791 quiet modulos="vfat " 
+initrd /boot/initrd-2.6.39.1-gabix
+
+# Item de menu: 4
+title [ Boot local ]
+configfile (cd)/boot/grub/menu.lst.local
+
+# Item de menu: 5
+title [ Ferramentas ]
+configfile (cd)/boot/grub/menu.lst.tools
+
+# Se desejar incluir um instalador do Debian no DVD, descomente as linhas abaixo
+# e faça o mesmo nos arquivos menu.lst.* adicionais.
+# Item de menu: 6
+#title [ Instalar Debian ]
+#configfile (cd)/boot/grub/menu.lst.installdeb
+

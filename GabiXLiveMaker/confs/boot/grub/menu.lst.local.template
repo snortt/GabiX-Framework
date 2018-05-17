@@ -1,0 +1,52 @@
+# Menu de boot local
+#
+# Gabriel Marques
+# gabrielm@lncc.br
+#
+# Qua Jun 29 12:46:19 BRT 2011
+#
+
+# Item de menu:
+default 2
+
+# Tempo antes de iniciar a entrada selecionada acima.
+timeout 7
+
+# Item de menu: 0
+title [ __NOMESTR__ Live ]
+configfile (cd)/boot/grub/menu.lst
+
+# Item de menu: 1
+title [ Boot local ]
+configfile (cd)/boot/grub/menu.lst.local
+
+# Item de menu: 2
+title .   __NOMESTR__ - BOOT disco local (sda1)
+kernel /boot/vmlinuz-__VERSAO__ selinux=0 vga=__VGASTR__ quiet root=/dev/sda1 modulos="vfat "
+initrd /boot/initrd-__VERSAO__
+
+# Item de menu: 3
+title .   __NOMESTR__ - BOOT disco local (sdb1)
+kernel /boot/vmlinuz-__VERSAO__ selinux=0 vga=__VGASTR__ quiet root=/dev/sdb1 modulos="vfat "
+initrd /boot/initrd-__VERSAO__
+
+# Item de menu: 4
+title .   __NOMESTR__ - Home no disco local (sda1)
+kernel /boot/vmlinuz-__VERSAO__ selinux=0 vga=__VGASTR__ quiet home=/dev/sda1 modulos="vfat "
+initrd /boot/initrd-__VERSAO__
+
+# Item de menu: 5
+title .   __NOMESTR__ - Home no disco local (sdb1)
+kernel /boot/vmlinuz-__VERSAO__ selinux=0 vga=__VGASTR__ quiet home=/dev/sdb1 modulos="vfat "
+initrd /boot/initrd-__VERSAO__
+
+# Item de menu: 6
+title [ Ferramentas ]
+configfile (cd)/boot/grub/menu.lst.tools
+
+# Se desejar incluir um instalador do Debian no DVD, descomente as linhas abaixo
+# e faça o mesmo nos arquivos menu.lst.* adicionais.
+# Item de menu: 7
+#title [ Instalar Debian ]
+#configfile (cd)/boot/grub/menu.lst.installdeb
+

@@ -1,0 +1,72 @@
+# Menu principal para o ISOLINUX
+#
+# Gabriel Marques - snortt@gmail.com
+#
+# Seg Mar 23 13:12:24 BRT 2015
+
+
+# Lembre-se de que a entrada [0] é o seu title [ __NOMESTR__ Live ] ;-)
+# Assim, a entrada [1] é o primeiro item dentro de [ __NOMESTR__ Live ]
+
+default vesamenu.c32
+menu background linux.png
+timeout 100
+prompt 0
+
+menu title Bem vindo ao __NOMESTR__ Live!
+
+label Normal
+    menu label ^__NOMESTR__
+    menu indent 4
+    kernel /boot/vmlinuz-__VERSAO__ selinux=0 ip_config="dhcp " vga=__VGASTR__ quiet modulos="vfat "
+    append initrd=/boot/initrd-__VERSAO__ 
+
+label NormalStaticIp
+    menu label __NOMESTR__-StaticIP
+    menu indent 4
+    kernel /boot/vmlinuz-__VERSAO__ selinux=0 ip_config="static 10.0.0.1 255.0.0.0 10.0.0.100 10.0.0.254" vga=__VGASTR__ quiet modulos="vfat " 
+    append initrd=/boot/initrd-__VERSAO__ 
+
+label Safe    
+    menu label __NOMESTR__ - ^Modo seguro
+    menu indent 4
+    kernel /boot/vmlinuz-__VERSAO__ noacpi acpi=off apm=power-off selinux=0 vga=__VGASTR__ quiet modulos="vfat"
+    append initrd=/boot/initrd-__VERSAO__ 
+
+
+# System
+label Local
+    menu label Boot ^Local
+    menu indent 4
+    kernel vesamenu.c32
+    append isolinuxlocal.cfg
+
+# MemTest
+label Tools
+    menu label ^Ferramentas
+    menu indent 4
+    kernel vesamenu.c32
+    append isolinuxtools.cfg
+
+# Altura do menu
+menu rows __ISOLINUX_MROWS__
+# Largura do menu
+menu width __ISOLINUX_MWIDTH__
+# Altura da mensagem "Press TAB for options..."
+menu tabmsgrow __ISOLINUX_TMSGROW__
+# Deslocamento vertical do menu.
+# De cima pra baixo, se positivo.
+# De baixo pra cima, se negativo.
+menu vshift __ISOLINUX_MVSHIFT__
+# Deslocamento horizontal do menu.
+# Para a direita, se positivo.
+# Para a esquerda, se negativo.
+menu hshift __ISOLINUX_MHSHIFT__
+# Altura da linha com a contagem regressiva.
+menu timeoutrow __ISOLINUX_MTIMEOUTROW__
+
+menu autoboot Iniciando o __NOMESTR__ em # segundos{,s}...
+menu tabmsg Pressione ENTER para iniciar ou TAB para editar as opcoes de boot
+menu color border       30;44      #00000000 #00000000 none
+menu color sel          7;37;40    #e0000000 #200080ff all
+menu color hotsel       1;7;37;40  #e0400000 #200080ff all

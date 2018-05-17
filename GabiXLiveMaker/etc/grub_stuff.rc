@@ -1,0 +1,17 @@
+# Diretorio com os arquivos utilizados para gerar os menus do GRUB do Live CD.
+CONFS_GRUB_DIR="${BASEDIR_GABIX}/confs/boot/grub"
+
+# Aponte esta variável para o(s) arquivo(s) de configuração de boot do GabiX
+# No caso do GRUB, faça:
+GRUBCFG="${BOOTDIR}/grub/menu.lst"
+GRUBCFG_LOCAL="${BOOTDIR}/grub/menu.lst.local"
+GRUBCFG_TOOLS="${BOOTDIR}/grub/menu.lst.tools"
+GRUBCFG_INSTALLDEB="${BOOTDIR}/grub/menu.lst.installdeb"
+
+# Arquivos de modelo para a construção dos menus do GRUB
+GRUBCFG_TEMPLATE="${CONFS_GRUB_DIR}/menu.lst.template"
+GRUBCFG_TEMPLATE_LOCAL="${CONFS_GRUB_DIR}/menu.lst.local.template"
+GRUBCFG_TEMPLATE_TOOLS="${CONFS_GRUB_DIR}/menu.lst.tools.template"
+GRUBCFG_TEMPLATE_INSTALLDEB="${CONFS_GRUB_DIR}/menu.lst.installdeb.template"
+
+

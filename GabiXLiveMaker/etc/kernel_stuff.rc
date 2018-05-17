@@ -1,0 +1,81 @@
+# Nome do arquivo que contem o miniroot com busybox e módulos do kernel.
+# INITRD_NAME_GZ="initrd-2.6.38.2-gabix"
+INITRD_NAME_GZ="initrd-$(basename $(stat -c %n ${BASEDIR_GABIX}/gabix/boot/vmlinuz* 2> /dev/null ) 2> /dev/null | cut -d "-" -f2-3)"
+
+# Versão do kernel atual em uso pelo sistema 
+# Não confunda esta variável com $kernel_version, usada apenas pela 
+# ferramenta de troca de kernels.
+KERNELVERSION="$(basename $(stat -c %n ${BASEDIR_GABIX}/gabix/boot/vmlinuz* 2> /dev/null) 2> /dev/null | cut -d "-" -f2-3)"
+
+# -----------------------------------------------
+# Configurações do empacotador/trocador de kernels.
+# Modulos a serem copiados para o miniroot x86 e x86_64
+MODULOS_PC=" \
+	aic79xx.ko aic7xxx.ko aic7xxx_old.ko aic94xx.ko ata_generic.ko ata_piix.ko \
+	atiixp.ko blk-cgroup.ko cdrom.ko cfq-iosched.ko cramfs.ko crc16.ko crc-itu-t.ko \ 
+	crc-t10dif.ko eata.ko ehci-hcd.ko exportfs.ko ext2.ko ext3.ko ext4.ko fat.ko \
+	floppy.ko hid.ko hwa-hc.ko ide-core.ko ide-generic.ko ide-cd_mod.ko \
+	ide-4drives.ko ide-cd_mod.ko ide-core.ko ide-cs.ko ide-gd_mod.ko ide-generic.ko \
+	ide-pci-generic.ko ide_platform.ko ide-pnp.ko ide-tape.ko \
+	i2c-tiny-usb.ko iscsi_boot_sysfs.ko iscsi_tcp.ko \
+	isofs.ko isp116x-hcd.ko isp1362-hcd.ko isp1760.ko jbd2.ko jbd.ko libahci.ko \
+	libata.ko loop.ko lzo_compress.ko mbcache.ko msdos.ko nls_base.ko nls_cp437.ko \
+	nls_cp850.ko nls_cp860.ko nls_iso8859-15.ko nls_iso8859-1.ko nls_utf8.ko \
+	ohci-hcd.ko oxu210hp-hcd.ko pata_ali.ko pata_amd.ko pata_artop.ko pata_atiixp.ko \
+	pata_atp867x.ko pata_cmd64x.ko pata_cs5520.ko pata_cs5530.ko pata_cs5536.ko \
+	pata_efar.ko pata_it821x.ko pata_jmicron.ko pata_marvell.ko pata_mpiix.ko \
+	pata_netcell.ko pata_ns87410.ko pata_ns87415.ko pata_oldpiix.ko pata_pcmcia.ko \
+	pata_pdc2027x.ko pata_pdc202xx_old.ko pata_piccolo.ko pata_rdc.ko pata_rz1000.ko \
+	pata_sc1200.ko pata_sch.ko pata_serverworks.ko pata_sil680.ko pata_sis.ko \
+	pata_triflex.ko pata_via.ko pcmcia.ko pcmcia_core.ko pcmcia_rsrc.ko piix.ko \
+	power_supply.ko r8a66597-hcd.ko rc-iodata-bctv7e.ko \
+	sata_inic162x.ko sata_mv.ko sata_nv.ko sata_promise.ko sata_qstor.ko sata_sil24.ko \
+	sata_sil.ko sata_sis.ko sata_svw.ko sata_sx4.ko sata_uli.ko sata_via.ko \
+	sata_vsc.ko scsi_debug.ko scsi_mod.ko scsi_tgt.ko scsi_transport_fc.ko \
+	scsi_transport_iscsi.ko scsi_transport_sas.ko scsi_transport_srp.ko scsi_wait_scan.ko \
+	sd_mod.ko sg.ko sl811_cs.ko sl811-hcd.ko squashfs.ko sr_mod.ko sx8.ko u132-hcd.ko \
+	uas.ko udf.ko uhci-hcd.ko ums-datafab.ko unionfs.ko usb-common.ko usbcore.ko \
+	usbhid.ko usb-storage.ko vfat.ko whci-hcd.ko xfs.ko xhci-hcd.ko yenta_socket.ko \
+	zlib_deflate.ko scsi_transport_spi.ko sym53c8xx.ko
+"
+
+# Modulos a serem copiados para o miniroot ARM
+MODULOS_ARM=" \
+	aic79xx.ko aic7xxx.ko aic7xxx_old.ko aic94xx.ko ata_generic.ko ata_piix.ko \
+	atiixp.ko blk-cgroup.ko cdrom.ko cfq-iosched.ko cramfs.ko crc16.ko crc-itu-t.ko \ 
+	crc-t10dif.ko eata.ko ehci-hcd.ko exportfs.ko ext2.ko ext3.ko ext4.ko fat.ko \
+	floppy.ko hid.ko hwa-hc.ko ide-core.ko ide-generic.ko ide-cd_mod.ko \
+	ide-4drives.ko ide-cd_mod.ko ide-core.ko ide-cs.ko ide-gd_mod.ko ide-generic.ko \
+	ide-pci-generic.ko ide_platform.ko ide-pnp.ko ide-tape.ko \
+	i2c-tiny-usb.ko iscsi_boot_sysfs.ko iscsi_tcp.ko \
+	isofs.ko isp116x-hcd.ko isp1362-hcd.ko isp1760.ko jbd2.ko jbd.ko libahci.ko \
+	libata.ko loop.ko lzo_compress.ko mbcache.ko msdos.ko nls_base.ko nls_cp437.ko \
+	nls_cp850.ko nls_cp860.ko nls_iso8859-15.ko nls_iso8859-1.ko nls_utf8.ko \
+	ohci-hcd.ko oxu210hp-hcd.ko pata_ali.ko pata_amd.ko pata_artop.ko pata_atiixp.ko \
+	pata_atp867x.ko pata_cmd64x.ko pata_cs5520.ko pata_cs5530.ko pata_cs5536.ko \
+	pata_efar.ko pata_it821x.ko pata_jmicron.ko pata_marvell.ko pata_mpiix.ko \
+	pata_netcell.ko pata_ns87410.ko pata_ns87415.ko pata_oldpiix.ko pata_pcmcia.ko \
+	pata_pdc2027x.ko pata_pdc202xx_old.ko pata_piccolo.ko pata_rdc.ko pata_rz1000.ko \
+	pata_sc1200.ko pata_sch.ko pata_serverworks.ko pata_sil680.ko pata_sis.ko \
+	pata_triflex.ko pata_via.ko pcmcia.ko pcmcia_core.ko pcmcia_rsrc.ko piix.ko \
+	power_supply.ko r8a66597-hcd.ko rc-iodata-bctv7e.ko \
+	sata_inic162x.ko sata_mv.ko sata_nv.ko sata_promise.ko sata_qstor.ko sata_sil24.ko \
+	sata_sil.ko sata_sis.ko sata_svw.ko sata_sx4.ko sata_uli.ko sata_via.ko \
+	sata_vsc.ko scsi_debug.ko scsi_mod.ko scsi_tgt.ko scsi_transport_fc.ko \
+	scsi_transport_iscsi.ko scsi_transport_sas.ko scsi_transport_srp.ko scsi_wait_scan.ko \
+	sd_mod.ko sg.ko sl811_cs.ko sl811-hcd.ko squashfs.ko sr_mod.ko sx8.ko u132-hcd.ko \
+	uas.ko udf.ko uhci-hcd.ko ums-datafab.ko unionfs.ko usb-common.ko usbcore.ko \
+	usbhid.ko usb-storage.ko vfat.ko whci-hcd.ko xfs.ko xhci-hcd.ko yenta_socket.ko \
+	zlib_deflate.ko scsi_transport_spi.ko sym53c8xx.ko
+"
+	    
+# Diretório que contém os kernels do GabiX
+KERNEL_DIR="${BASEDIR_GABIX}/kernel"
+
+# Diretório onde os scripts que manipulam pacotes do kernel farão sua bagunça
+KERNEL_TMP_AREA="${KERNEL_DIR}/tmp"
+
+# Arquivo de controle da arquitetura configurada.
+arch_control_file=".arch_control"
+
+

@@ -1,0 +1,9 @@
+N:input/event5
+S:char/13:69
+E:ID_INPUT=1
+E:ID_INPUT_KEY=1
+E:XKBMODEL=pc105
+E:XKBLAYOUT=us
+E:XKBVARIANT=intl
+E:XKBOPTIONS=
+E:DMI_VENDOR=Hewlett-Packard

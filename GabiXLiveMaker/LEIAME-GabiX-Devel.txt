@@ -1,0 +1,314 @@
+-----------
+GabiX Linux
+-----------
+
+GabiX é uma framework que permite a criação de sistemas do tipo live. 
+Embora seja baseado no Debian, uma vez feitas as devidas modificações, 
+o GabiX deve ser capaz de utilizar outras distribuições Linux (pra quê? ;-P)
+
+========
+ATENÇÃO:
+========
+
+    * O GabiX precisa de acesso administrativo para realizar determinadas operações! 
+    * O autor não se responsabiliza pela perda parcial ou total de dados em qualquer computador 
+      onde o sistema venha a ser utilizado.
+    * Não há qualquer garantia para o sistema. Use por sua conta e risco!
+
+-----
+NOTA:
+-----
+
+	O suporte para a arquitetura ARM (armel) é experimental e ainda em 
+	desenvolvimento pesado. Por hora ele serve apenas como prova de conceito.
+
+-----------
+Importante:
+-----------
+
+* A criação de sistemas Linux live com o GabiX é feita através do uso de 
+  ferramentas integradas. Isso significa que, antes de modificar qualquer 
+  uma delas, você deve entender muito bem como cada parte da framework 
+  depende de uma ou mais partes. Sem uma visão geral de como toda a framework se comporta, 
+  alterações erradas podem tornar o processo de construção completamente inútil!
+  
+* O GabiX não tem qualquer tipo de garantia. O autor não se responsabiliza
+  pela perda, total ou parcial, de dados devido ao seu uso. Faça sempre uma cópia de segurança! 
+  Use-o por sua conta e risco
+
+* Leia o conteúdo deste arquivo antes de começar a brincar e evite possíveis 
+  dores de cabeça durante os processos envolvidos na construção do sistema.
+
+* Antes de começar a usar o GabiX, execute ``make help''.
+
+* Para escolher entre 32bits ou 64bits, execute ``make config_32'' ou ``make config_64''.
+
+
+--------------------------
+Requisitos e dependências:
+--------------------------
+
+* Para utilizar a Framework do GabiX, você precisa trabalhar como root ou ter o sudo 
+  configurado para sua sessão de usuário, uma vez que muitos comandos precisam 
+  de acesso administrativo.
+
+* Programas necessários para criar imagens squashfs do sistema,arquivos ISO e compilar kernels: 
+
+      cdebootstrap squashfs-tools genisoimage make gcc binutils bin86 kernel-package libncurses5-dev 
+
+
+
+----------------------------------------------------------
+Para os impacientes ou que não gostam de ler documentação:
+----------------------------------------------------------
+
+Receita rápida para montar um live CD com o GabiX:
+
+* Instale a framework ;-)
+* Verifique se você possui as dependências instaladas em seu sistema (veja acima).
+* Escolha sua arquitetura com um dos comandos: make config_32 ou make config_64
+* Usando cdebootstrap ou debootstrap, crie o seu diretório root-NFS com sua 
+  customização do Debian, ou use os "tarballs" que acompanham a framework.  
+    - confs/fresh_bootstrap/GabiX-root-NFS-x86-base-minimo.tar.bz2 
+    - confs/fresh_bootstrap/GabiX-root-NFS-x86_64-base-minimo.tar.bz2"
+* Certifique-se de que o "jail" do Debian está de acordo com o que o GabiX precisa (melhor você ler a documentação ;-P).
+* Entre no seu jail (chroot) e instale o que desejar no sistema, via APT.
+* Edite o arquivo etc/configs.rc e ajuste-o de acordo com sua necessidade.
+* Execute make all 
+* Grave seu "LiveCD.iso" resultante.
+
+
+
+---------
+Arquivos:
+---------
+
+ajustar_kernel_packages.sh
+	Script para converter os pacotes linux-image e linux-headers em um
+	único tarball, já com os links simbólicos ajustados para uso no GabiX.
+
+backup_GabiX-devel.sh:
+	Script para fazer o backup do diretório raiz GabiX-devel
+	
+clean_sysfiles.sh:
+	Script para limpar os diretórios antes de criar as imagens squashfs.
+	
+clean_sysfiles.sh:
+    Script para efetuar uma "limpeza" (leia-se remoção, em alguns casos) nos 
+    diretórios usados para criar as imagens squashfs. Arquivos de localizações, 
+    configurações de fuso-horário e arquivos interno do sistema são removidos 
+    para liberar mais espaço e deixar as imagens squashfs menores. Para saber mais 
+    sobre como configurar este recurso, leia o arquivo configs_env.sh.	
+
+configs.rc:
+	Script de configurações globais para todo o sistema de construção.
+	Sempre que precisar ajustar alguma coisa, edite este arquivo antes de qualquer 
+	outro. O que vc procura, provavelmente, estará neste arquivo.
+    De fato, a idéia é que você esqueça todos os demais e use só este ;-)
+
+cores.rc:
+    Arquivo de configurações para as cores do shell.
+
+criar_miniroot.sh:
+	Script para criar o miniroot do GabiX, usado como initrd, durante sua inicialização.
+	
+criar_squashfs.sh:
+	Script para criar as imagens squashfs.
+
+funcoes.rc:
+    Arquivo de configurações de funções auxiliares.
+
+gravar_midia.sh:
+	Script para gravar a imagem ISO em uma mídia.
+
+kernel/src/logo/converter_logo:	
+	Ferramenta para converter imagens png para ppm (formato do logo do kernel).
+
+kernel/compilar.sh:
+    Script para compilar o kernel. Copie-o para a raiz de seu kernel novo e execute-o
+    passando, como argumento, o dobro do número de CPUs em seu computador. Assim, 
+    ele invocará a ferramenta de construção de kernel do Debian, disparando múltiplas 
+    tarefas de compilação concorrente. O resultado serão pacotes .deb do kernel, um 
+    nível de diretório acima da raiz de seu kernel novo.
+
+kernel/config-GabiX-i386-generico:
+    Arquivo de configuração de um kernel genérico para o GabiX.
+
+Makefile:
+	Arquivo de controle para a construção do sistema.
+
+make-iso.sh:
+	Script para criar o arquivo ISO.
+
+strip_bins_e_libs.sh:
+    Script para "estripar" binários e bibliotecas, deixando-os mais rápidos e leves.
+    Aviso: "estripar" arquivos faz, entre outras coisas, com que você perca a habilidade 
+           de depurá-los. Pense nisso antes de executar este script ;-).
+
+trocar_kernel_miniroot.sh:
+	Script para trocar o kernel do sistema.
+
+
+
+-----------
+Diretórios:
+-----------
+
+backup:
+	Diretório que contém os pacotes gerados pelo script de backup do diretório raiz.
+
+confs:
+	Diretório de configurações com arquivos de modelo e pacotes.
+
+	confs/boot/grub:
+		Contém os arquivos modelos utilizados para gerar os menus do GRUB automaticamente.
+
+	confs/boot/armel:
+		Contém os arquivos modelos utilizados para boot em ARM (experimental).
+
+    confs/boot_stuff:
+        Diretório com os arquivos referentes ao processo de boot gráfico e texto, incluindo código-fonte. 
+
+	confs/fresh_bootstrap:
+		Contém os pacotes pré-configurados com o mínimo para iniciar a montagem do GabiX:
+
+			* GabiX-root-NFS-x86-base-minimo.tar.bz2
+				Pacote com o Debian stable 32 bits, debootstrapped e já configurado de forma mínima.
+
+            * GabiX-root-NFS-x86_64-base-minimo.tar.bz2
+                Pacote com o Debian stable 64 bits, debootstrapped e já configurado de forma mínima.
+
+	confs/fresh_cd_root:
+		Contém os arquivos da raiz que dará origem à imagem de BOOT do GabiX.
+
+	confs/fresh_miniroot:
+		Contém os pacotes pré-configurados com o mínimo para iniciar a montagem do miniroot.
+
+    confs/nomestr_sys_files:
+        Contém os arquivos template para gerar o nome do sistema a partir das variávels em configs.rc
+		Considere editar estes arquivos ao invés dos arquivos direto no diretório da "jaula".
+
+    confs/pacotes:
+        Contém tarballs de configurações do sistema. Os 'esqueletos' de 'home' estão neste diretório.
+
+docs:
+	Diretório de documentação geral da framework GabiX.
+
+etc:
+	Diretório com todos os arquivos de configurações do sistema de construção do GabiX.
+
+gabix:
+	Raiz do GabiX live. A imagem ISO é criada a partir deste diretório.
+    Este é um link simbólico para gabix_arquitetura_selecionada.
+
+	gabix/base:
+		Contém as imagens squashfs usadas pelo GabiX.
+
+	gabix/boot:
+		Contém as imagens de boot utilizadas pelo GabiX.
+
+	gabix/boot/grub:
+		Contém os arquivos do gerenciador de inicialização do GabiX.
+
+	gabix/pkg:
+		Contém pacotes (opcionais) que podem ser instalados no sistema após sua inicialização (.deb).
+
+	gabix/drv:
+		Contém drivers (opcionais) que podem ser adicionados ao sistema após sua inicialização.
+
+	gabix/installdeb:
+		Contém os arquivos extraídos de uma ISO de instalação Debian. Use este diretório para incluir um 
+        instalador completo do Debian em seu sistema. Não se esqueça de remover os comentários dos 
+        arquivos confs/grub/menu.lst.*.template 
+
+kernel:
+	Diretório que contém o kernel, em formato .deb, que pode ser instalado no sistema.
+
+    kernel/kernel-2.6-gabix:
+        Contém pacotes .deb de imagens e cabeçalhos do kernel. Podem ser usados com a 
+        ferramenta de ajuste de kernel para criar tarballs instaláveis no GabiX.
+
+	kernel/nvidia_drv/nv_live_x86:
+		Contém os drivers e ferramentas para lidar com placas Nvidia, 32 bits. (Leia o manual).
+
+	kernel/nvidia_drv/nv_live_x86_64:
+		Contém os drivers e ferramentas para lidar com placas Nvidia, 64 bits. (Leia o manual).
+
+	kernel/src:
+		Arquivos fontes do kernel linux usado no GabiX.
+	
+    kernel/tmp:
+        Área temporária usada pelas ferramentas de ajuste e instalação de kernels no GabiX.
+
+miniroot:
+	Diretório que contém o busybox, instalado e configurado, para a construção do initrd.
+	Na verdade, miniroot é um link simbólico para miniroot_arquitetura_selecionada.
+
+root-NFS:
+	Link simbólico que aponta para o verdadeiro root-NFS-*, que contém o sistema Debian
+	que dará origem à imgem squashfs usada pelo GabiX. O diretório root-NFS-* real fica 
+	fora do diretório GabiX-devel, apenas por questões de tamanho. Uma vez que o você 
+	certamente criará mais de um diretório desse tipo, fica mais cômodo armazená-los em uma 
+	raiz separada, GabiX-root-NFS/ por exemplo, fora da raiz GabiX-devel.
+
+src:
+	Diretório de fontes de código.
+
+temas:
+	Diretório contendo temas feitos para diversas partes do sistema.
+
+
+
+		
+------------------------		
+Possíveis alvos de make:
+------------------------
+
+	config_32       - Ajusta o GabiX para 32 bits.
+	config_64       - Ajusta o GabiX para 64 bits.
+	config_armel    - Ajusta o GabiX para ARM (armel).
+	all             - Passa por todas as etapas.
+	clean 			- Apaga os arquivos criados. ISO e SquashFS (mantém ajustes).
+	clean_links 	- Apaga apenas os links simbólicos criados (reset arquitetura).
+	all_clean_soft  - Passa por todas as etapas. Remove fuso-horário e idiomas não usados.
+	all_clean_hard  - Passa por todas as etapas. Remove fuso-horário, idiomas não usados e documentação.
+	criar_miniroot  - Cria o initrd do GabiX.
+	criar_iso_file  - Cria apenas o arquivo ISO.
+	criar_squash_fs - Cria a imagem SquashFS do sistema.
+
+
+
+----------------
+Exemplos de uso:
+----------------
+
+	Escolher entre usar 32 bits ou 64 bits:
+
+		make config_32
+		make config_64
+
+	Construir uma imagem ISO, passando por  todas as etapas:
+	
+		make all
+	
+	Construir uma imagem ISO, passando por todas as etapas e removendo documentação antes 
+	de construir a imagem squashfs:
+	
+		make all_full_clean
+		
+	Construir somente o miniroot:
+	
+		make criar_miniroot
+
+
+		
+-----------------------		
+Última atualização em :
+-----------------------
+#
+# Gabriel Marques
+# snortt@gmail.com
+#
+# Quarta, 8 de Janeiro de 2014
+# 11:13:23 BRST
+#

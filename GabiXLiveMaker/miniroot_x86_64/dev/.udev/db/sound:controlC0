@@ -1,0 +1,5 @@
+N:snd/controlC0
+S:char/116:6
+S:snd/by-path/pci-0000:00:14.2
+E:ID_PATH=pci-0000:00:14.2
+G:udev-acl

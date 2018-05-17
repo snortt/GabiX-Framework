@@ -1,0 +1,40 @@
+# 
+# Configuracoes de ambiente shell para os scripts do GabiX
+#
+# Não execute este arquivo diretamente. Ele deve ser importado por cada script, 
+# quando necessario.
+#
+# Gabriel Marques
+# gabrielm@lncc.br
+#
+# Sex Nov  4 14:48:15 BRST 2011
+#
+
+# --------------------------------
+# Cores para o shell
+RESET='\033[0m'
+BRANCO='\033[39;1m'
+VERMELHO='\033[31;1m'
+VERDE='\033[32;1m'
+AMARELO='\033[33;1m'
+AZUL='\033[34;1m'
+MAGENTA='\033[35;1m'
+CIANO='\033[36;1m'
+BRANCOB='\033[37;1m'
+
+# -------------------------------
+# Tema de cores 
+# Cores usadas nas mensagens de texto ao longo do boot
+# Se desejar criar temas, é aqui que você deve modificar.
+TEXTO="$AZUL"
+FORTE="$BRANCOB"
+ADERECO="$AZUL"
+DEV="$MAGENTA"
+MOD="$MAGENTA"
+ACERTO="$VERDE"
+AVISO="$AMARELO"
+ERRO="$VERMELHO"
+SEPARADOR="$AMARELO"
+APONTADOR="$VERMELHO"
+EXEC_SHELL="$VERMELHO"
+

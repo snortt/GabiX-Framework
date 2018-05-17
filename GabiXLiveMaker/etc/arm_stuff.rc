@@ -1,0 +1,5 @@
+# Arquivos referentes ao BOOT para o ARM.
+# TODO: Mudar isso para um nome mais apropriado (pboot, mboot, etc.).
+ARM_BOOT_CFG="${BASEDIR_GABIX}/confs/boot/armel"
+
+

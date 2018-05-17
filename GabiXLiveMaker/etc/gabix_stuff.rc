@@ -1,0 +1,95 @@
+# Diretório base de todo o ambiente
+# ex: BASEDIR_GABIX="/home/biel/devel/GabiX-devel/"
+# Este é mais legal! Ele funciona melhor por ser um caminho relativo ;-)
+# ex: BASEDIR_GABIX="$PWD" 
+BASEDIR_GABIX="$PWD"
+
+# Nvidia driver dir
+NVDRVDIR="nv_live"
+
+# Diretorio que contem a raiz que dará origem à imagem ISO do gabix.
+GABIXROOTDIR="${BASEDIR_GABIX}/gabix"
+
+# Diretório de drivers na raiz da imagem ISO.
+GABIXDRVDIR="${GABIXROOTDIR}/drv"
+
+# Diretório na raiz do CD, onde está o driver da Nvidia.
+GABIXNVDRVDIR="${GABIXDRVDIR}/${NVDRVDIR}"
+
+# Aponte esta variável para onde estiver seu diretório "gabix/boot".
+# Este diretório contém as de kernel utilizadas para iniciar o GabiX.
+BOOTDIR="${GABIXROOTDIR}/boot"
+
+# Vamos dizer onde estão os arquivos para carregar o driver da Nvidia
+# Note que este local é um link simbólico para o verdadeiro driver, em 
+# ./kernel/nvidia_drv/nv_live_<arquitetura>, o que faz com que o 
+# montador da imagem SquashFS sempre combine as arquiteturas do sistema e 
+# do driver, de forma correta.
+NVIDIAROOTDIR="${BASEDIR_GABIX}/${NVDRVDIR}"
+
+# Aponte esta variável para onde estiver seu diretório "gabix/base".
+# Este diretório contém as imagens SquashFS.
+BASEDIR="${GABIXROOTDIR}/base"
+
+# Nome do arquivo squashfs 
+# AVISO: Se for mudar, lembre-se de que o mesno nome é usado no init do miniroot!
+SQUASHFILE="sistema"
+
+# ---------------------------------------------------
+# Configurações de pacotes e arquivos de modelo.
+# Diretorio com backups das configuracoes do sistema.
+# Alguns arquivos deste diretório são utilizados como templates pelas 
+# diversas etapas de construção do GabiX.
+CONFS_DIR="${BASEDIR_GABIX}/confs"
+
+# Diretorio com arquivos empacotados que podem ser utilizados durante 
+# as etapas de construção do GabiX. Um deles é o tarball que guarda
+# o conteúdo do "/dev" da imagem SquashFS. Antes de criar as imagens SquashFS, 
+# seu /dev/.{udev,init*} é compactado neste diretório e removido da raiz das imagens.
+# Depois que as imagens forem construídas, seu /dev é restaurado.
+# Uma imagem SquashFS não precisa ser criada com seu /dev/.udev e /dev/.init* 
+# porque estes são gerados dinamicamente durante o boot ;-).
+CONFS_PKGS_DIR="${BASEDIR_GABIX}/confs/pacotes"
+
+# Diretório com os modelos de configuração para a construção do nome do sistema
+NOMESTR_SYS_FILES_TEMPLATES="${CONFS_DIR}/nomestr_sys_files"
+
+# Arquivos para trocar o nome do sistema para NOMESTR e  NOMESTR_SYS
+NOMESTR_SYS_FILE_HOSTS_TEMPLATE="${NOMESTR_SYS_FILES_TEMPLATES}/etc/hosts"
+NOMESTR_SYS_FILE_HOSTNAME_TEMPLATE="${NOMESTR_SYS_FILES_TEMPLATES}/etc/hostname"
+NOMESTR_SYS_FILE_RCLOCAL_TEMPLATE="${NOMESTR_SYS_FILES_TEMPLATES}/etc/rc.local"
+NOMESTR_SYS_FILE_NOUVEAU_OFF_TEMPLATE="${NOMESTR_SYS_FILES_TEMPLATES}/etc/modprobe.d/nouveau-off.conf"
+NOMESTR_SYS_FILE_MOTD_TEMPLATE="${NOMESTR_SYS_FILES_TEMPLATES}/etc/motd"
+NOMESTR_SYS_FILE_ISSUE_TEMPLATE="${NOMESTR_SYS_FILES_TEMPLATES}/etc/issue"
+NOMESTR_SYS_FILE_ROOTBASHRC_TEMPLATE="${NOMESTR_SYS_FILES_TEMPLATES}/root/.bashrc"
+NOMESTR_SYS_FILE_GABIXBASHRC_TEMPLATE="${NOMESTR_SYS_FILES_TEMPLATES}/home/gabix/.bashrc"
+NOMESTR_SYS_FILE_GABIXPROFILE_TEMPLATE="${NOMESTR_SYS_FILES_TEMPLATES}/home/gabix/.profile"
+
+# Arquivos de destino com o nome do sistema para NOMESTR e  NOMESTR_SYS
+NOMESTR_SYS_FILE_HOSTS="etc/hosts"
+NOMESTR_SYS_FILE_HOSTNAME="etc/hostname"
+NOMESTR_SYS_FILE_RCLOCAL="etc/rc.local"
+NOMESTR_SYS_FILE_NOUVEAU_OFF="etc/modprobe.d/nouveau-off.conf"
+NOMESTR_SYS_FILE_MOTD="etc/motd"
+NOMESTR_SYS_FILE_ISSUE="etc/issue"
+NOMESTR_SYS_FILE_ROOTBASHRC="root/.bashrc"
+NOMESTR_SYS_FILE_GABIXBASHRC="home/gabix/.bashrc"
+NOMESTR_SYS_FILE_GABIXPROFILE="home/gabix/.profile"
+
+# ---------------------------------------
+# Configurações para funções dos scripts.
+# Diretório passado como argumento a ser processado. Ele é quem diz qual
+# diretório deve ser processado por cada ferramenta.
+# Será gabix, miniroot, etc. Depende de qual script/função utilizar a variável.
+# Na dúvida, não altere esta variável.
+ROOTDIR="$1"
+
+# Usadas pelo script de criar SquashFS
+MAKEIT=$(which mksquashfs)
+UDEV_NET_CFG_FILE="${ROOTDIR}/etc/udev/rules.d/70-persistent-net.rules"
+
+# Arquivo carregador do driver da Nvidia.
+STR_NVIDIA_OFF="#\/cdrom\/drv\/nv_live\/carregar_nv_drv.sh"
+STR_NVIDIA_ON="\/cdrom\/drv\/nv_live\/carregar_nv_drv.sh"
+
+

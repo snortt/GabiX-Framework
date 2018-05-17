@@ -1,0 +1,39 @@
+# Menu de instalacao do Debian
+#
+# Gabriel Marques
+# gabrielm@lncc.br
+#
+# Qua Jun 29 12:47:20 BRT 2011
+#
+
+# Item de menu:
+default 3
+
+# Tempo antes de iniciar a entrada selecionada acima.
+timeout 7
+
+# Item de menu: 0
+title [ __NOMESTR__ Live ]
+configfile (cd)/boot/grub/menu.lst
+
+# Item de menu: 1
+title [ Boot local ]
+configfile (cd)/boot/grub/menu.lst.local
+
+# Item de menu: 2
+title [ Ferramentas ]
+configfile (cd)/boot/grub/menu.lst.tools
+
+# Item de menu: 3
+# Instalador do Debian 32bit
+#title .   Instalar Debian i386
+#kernel /installdeb/install.386/vmlinuz
+#initrd /installdeb/install.386/initrd.gz
+
+# Item de menu: 4
+# Instalador do Debian 64bit
+#title .   Instalar Debian amd64
+#kernel /installdeb/install.amd/vmlinuz
+#initrd /installdeb/install.amd/initrd.gz
+
+

@@ -1,0 +1,7 @@
+Este diretório deve conter os arquivos 
+extraídos de uma ISO de instalação do Debian.
+
+Não esqueça de remover os comentários
+das linhas nos arquivos de configuração do menu do GRUB.
+
+

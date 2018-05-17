@@ -1,0 +1,17 @@
+# Diretorio com os arquivos utilizados para gerar os menus do ISOLINUX do Live CD.
+CONFS_ISOLINUX_DIR="${BASEDIR_GABIX}/confs/boot/isolinux"
+
+# Aponte esta variável para o(s) arquivo(s) de configuração de boot do GabiX
+# No caso do ISOLINUX, faça:
+ISOLINUXCFG="${BOOTDIR}/isolinux/isolinux.cfg"
+ISOLINUXCFG_LOCAL="${BOOTDIR}/isolinux/isolinuxlocal.cfg"
+ISOLINUXCFG_TOOLS="${BOOTDIR}/isolinux/isolinuxtools.cfg"
+#ISOLINUXCFG_INSTALLDEB="${BOOTDIR}/isolinux/isolinuxinstalldeb.cfg"
+
+# Arquivos de modelo para a construção dos menus do ISOLINUX
+ISOLINUXCFG_TEMPLATE="${CONFS_ISOLINUX_DIR}/isolinux.cfg.template"
+ISOLINUXCFG_TEMPLATE_LOCAL="${CONFS_ISOLINUX_DIR}/isolinuxlocal.cfg.template"
+ISOLINUXCFG_TEMPLATE_TOOLS="${CONFS_ISOLINUX_DIR}/isolinuxtools.cfg.template"
+#ISOLINUXCFG_TEMPLATE_INSTALLDEB="${CONFS_ISOLINUX_DIR}/isolinuxinstalldeb.cfg.template"
+
+

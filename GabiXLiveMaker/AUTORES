@@ -1,0 +1,16 @@
+Se você está colaborando com o GabiX, por favor, apresente-se :-)
+-----------------------------------------------------------------
+
+Gabriel Marques - snortt@gmail.com - 2010
+    - Idealização e conceitos iniciais
+    - Desenvolvimento inicial
+    - x86, x86_64 e ARM 
+    - Miniroot e kernel
+    - Driver Nvidia
+    - Scripts para ajustes e troca de kernels
+    - Scripts de construçao e Makefile
+    - Documentação
+
+Leonardo Jerônimo - leo.cobol@gmail.com - 2013
+    - suporte para ISOLinux
+

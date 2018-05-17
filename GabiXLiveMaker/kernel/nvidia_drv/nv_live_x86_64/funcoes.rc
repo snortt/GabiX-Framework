@@ -1,0 +1,77 @@
+# 
+# Configuracoes de ambiente shell para os scripts do carregador da Nvidia.
+#
+# Não execute este arquivo diretamente. Ele deve ser importado por cada script, 
+# quando necessario.
+#
+# Gabriel Marques
+# gabrielm@lncc.br
+#
+# Sex Nov  4 14:48:15 BRST 2011
+#
+
+# Carrega as cores
+. ${NV_LIVE_DIR}/cores.rc
+
+# Defina aqui o identificador de placas NVidia.
+export NVID="10de:"
+
+# -----------------------------
+# Funções auxiliares
+# Funcao que imprime mensagens de sucesso
+printOK() {
+    echo -e "$@ ${ADERECO}[${ACERTO}OK${ADERECO}]${RESET}"
+}
+
+# Funcao que imprime mensagens de erro
+printError() {
+    echo -e "$@ ${ADERECO}[${ERRO}Erro${ADERECO}]${RESET}"
+}
+
+# Funcao que imprime mensagens de aviso
+printWarn() {
+    echo -e "$@ ${ADERECO}[${AVISO}Aviso${ADERECO}]${RESET}"
+}
+
+# Funcao que imprime mensagens
+# Se receber 1 em $1, imprime mensagem extendida ("*** TEXTO ***").
+# Do contrário, imprime mensagem comum ("TEXTO").
+printMsg() {
+    if [ "$1" == "1" ]; then
+        shift
+        echo -e "${ADERECO}*** ${TEXTO}$@ ${ADERECO}***${RESET}"
+    else
+        echo -e "${TEXTO}$@ ${RESET}"
+    fi 
+}
+
+# Tentativas de carregar e instalar os arquivos do driver
+carregar_driver() {
+	printMsg "Instalando driver. Por favor, aguarde."
+	tar xjfv ${nvidia_drv_pack} -C / > /var/log/carregador_nvidia.log 2>&1 \
+	&& printOK || printError
+}
+
+gerar_dependencias() {
+	printMsg "Gerando dependencias de modulos. Por favor, aguarde."
+	depmod -aq && printOK || printError
+}
+
+configurar_xorg() {
+	# Vamos aproveitar que o software inclui o comando nvidia-xconfig ;-)
+	printMsg "Gerando arquivo do X.org"
+	nvidia-xconfig > /dev/null 2>&1 && printOK || printError
+}
+
+procurar_nvidia() {
+	if lspci -n | grep $NVID > /dev/null 2>&1; then
+		printMsg "Parece que há uma placa ${AVISO}nvidia ${TEXTO}em seu sistema"
+		carregar_driver
+		gerar_dependencias
+		configurar_xorg
+		printOK "Driver carregado com sucesso! : "
+	else
+		printMsg "${ERRO}Nao achei ${TEXTO}qualquer placa ${AVISO}nvidia ${TEXTO}em seu sistema"
+	fi
+}
+

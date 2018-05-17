@@ -1,0 +1,55 @@
+#!/bin/bash
+# 
+# Este arquivo pode ser utilizado para gerenciar as cores do shell
+# Gabriel Marques - gabrielm@lncc.br
+# 
+ 
+# Definicao das cores para o texto do terminal:
+# ---------------------------------------------
+
+# Reseta o modo de cor do FB
+#RESET="]R"
+# Cores ANSI
+# Envia apagar para o final da linha
+#CRE="[K"
+# Limpa a tela e reset
+#CLEAR="c"
+
+# Cores em ASCII - o caractere estranho 
+# no inicio de cada variavel e o ESC ('\033', '[')
+#BRANCO="[0;39m"
+#VERMELHO="[1;31m"
+#VERDE="[1;32m"
+#AMARELO="[1;33m"
+#AZUL="[1;34m"
+#MAGENTA="[1;35m"
+#CIANO="[1;36m"
+#BRANCOB="[1;37m"
+
+# Cores ASCII
+RESET='\033[0m'
+BRANCO='\033[39;1m'
+VERMELHO='\033[31;1m'
+VERDE='\033[32;1m'
+AMARELO='\033[33;1m'
+AZUL='\033[34;1m'
+MAGENTA='\033[35;1m'
+CIANO='\033[36;1m'
+BRANCOB='\033[37;1m'
+
+# Cores usadas nas mensagens de texto ao longo do boot
+# Se desejar criar temas, é aqui que você deve modificar.
+TEXTO="$CIANO"
+FORTE="$BRANCOB"
+ADERECO="$AZUL"
+DEV="$MAGENTA"
+MOD="$MAGENTA"
+ACERTO="$VERDE"
+AVISO="$AMARELO"
+ERRO="$VERMELHO"
+SEPARADOR="$AMARELO"
+APONTADOR="$VERMELHO"
+EXEC_SHELL="$VERMELHO"
+
+
+

@@ -1,0 +1,6 @@
+N:input/event10
+S:char/13:74
+E:ID_INPUT=1
+E:ID_PATH=pci-0000:02:00.1
+E:DMI_VENDOR=Hewlett-Packard
+G:udev-acl

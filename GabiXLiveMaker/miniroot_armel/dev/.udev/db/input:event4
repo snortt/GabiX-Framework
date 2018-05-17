@@ -1,0 +1,7 @@
+N:input/event4
+S:char/13:68
+S:input/by-path/platform-pcspkr-event-spkr
+E:ID_INPUT=1
+E:ID_SERIAL=noserial
+E:ID_PATH=platform-pcspkr
+E:DMI_VENDOR=Hewlett-Packard

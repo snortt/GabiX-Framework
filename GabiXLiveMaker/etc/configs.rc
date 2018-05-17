@@ -1,0 +1,133 @@
+# 
+# Configuracoes globais para os scripts do GabiX
+#
+# Este arquivo contém as variáveis utilizadas por todos os 
+# scripts utilizados nas etapas de construção do GabiX Linux Live.
+# 
+# Se precisar realizar alterações no ambiente de construção, utilize este arquivo.
+#
+# Não execute este arquivo diretamente. Ele deve ser importado por cada script, 
+# quando necessario.
+#
+# Gabriel Marques - snortt@gmail.com
+# Seg Mar  2 20:36:56 BRT 2015
+#
+
+# ------------------------
+# Configurações globais
+# ------------------------
+#
+# *** AVISO ***
+# Sobre a nomenclatura usada para criar as imagens:
+# Evite nomes longos, pois o tamanho da string composta pelo nome do 
+# ISO + Meta dados não pode passar de 32 caracteres.
+#
+# Assim, ISOFILESTR + DEVELOPER + EMAILSTR < 32 chars
+#
+# Nome da versão do seu sistema Linux Live.
+# Se você não gosta do nome GabiX ou tem outro nome melhor, use a variável abaixo
+# para definir o nome de sua preferência. ;-)
+# 
+# Nome que aparece na tela de boot e mensagens de boas vindas (init).
+# Evite usar muitas palavras para nomear seu sistema!
+NOMESTR="GabiXLL"
+# O mesmo que o anterior, porém para os arquivos do sistema. 
+# hostname, hosts, issue, motd, etc.
+# Evite espaços e acentos.
+NOMESTR_SYS="gabix"
+# Nome do arquivo ISO que será criado.
+ISOFILESTR="GabiXLL.iso"
+
+# Resolução da tela para o modo texto.
+# Bits(Cores)  640x480  800x600  1024x768  1280x1024  1400x1050  1600x1200
+# 8(256)       769      771      773       775	      ---        ---
+# 15(32K)      784      787      790       793	      ---        ---
+# 16(65K)      785      788      791       794        834        884
+# 24(16M)      786      789      792       795	      ---        ---
+VGASTR="791"
+
+# Aqui você pode especificar o seu nome (desenvolvedor)
+DEVELOPER="Gabriel M."
+
+# Aqui você pode especificar seu e-mail para contatos ;-)
+EMAILSTR="snortt@gmail.com"
+
+# Esta variável montará o cabeçalho do arquivo ISO.r
+# Máximo 32 caracteres.
+PUBLISHERSTR="${DEVELOPER} ${EMAILSTR}"
+
+# Bootloader a ser utilizado.
+#BOOT_LOADER="grub"
+BOOT_LOADER="isolinux"
+# Configuracoes do menu do ISOLINUX
+# Altura do menu
+ISOLINUX_MROWS=7
+# Largura do menu
+ISOLINUX_MWIDTH=60
+# Altura da mensagem "Press TAB for options..."
+ISOLINUX_TMSGROW=21
+# Deslocamento vertical do menu.
+# De cima pra baixo, se positivo.
+# De baixo pra cima, se negativo.
+ISOLINUX_MVSHIFT=2
+# Deslocamento horizontal do menu.
+# Para a direita, se positivo.
+# Para a esquerda, se negativo.
+ISOLINUX_MHSHIFT=10
+# Altura da linha com a contagem regressiva.
+ISOLINUX_MTIMEOUTROW=0
+
+# Configuração da rede
+# Se for usar dhcp, não há necessidade de usar as variáveis do bloco
+# Se for usar static, modifique as variáveis do bloco 
+#
+## Ip dinâmico:
+NETWORK_MODE="dhcp"
+
+## Ip estático
+#NETWORK_MODE="static"
+#NETWORK_IP="192.168.1.78"
+#NETWORK_MASK="255.255.255.0"
+#NETWORK_DNS="192.168.1.254"
+#NETWORK_GATEWAY="192.168.1.254"
+
+# Se desejar iniciar a interface gráfica no boot, inicie a variável abaixo com "1"
+USE_XORG="0"
+
+# Se desejar usar o driver da Nvidia, inicie a varável abaixo com "1".
+# USENVDRV="0"  - Não usa o driver Nvidia (proprietário)
+# USENVDRV="1"  - Usa o driver Nvidia (proprietário)
+USENVDRV="0"
+
+# Caractere da barra de progresso, quando usada
+# Aqui vc pode escolher o símbolo que prefere 
+# ver na tela quando uma barra de progresso for usada ;-)
+# ".", "*", "=", "-", etc.
+# Não confunda com a barra de progresso do "mksquashfs", que é hard coded ;-)
+PROGRESSBAR="."
+
+# ID do usuário que vai usar as ferramentas. Útil para quando não for usar o root.
+# Note que alguns scripts ainda precisam de permissões de root (sudo cai bem ;-P )
+FILES_USER_ID="1000"
+FILES_GROUP_ID="1000"
+
+# Tamanho da área de memória para o "tmpfs" usado pelo /dev 
+TMPFS_SIZE="64k"
+
+# Modo de permissões para o /dev 
+TMPFS_MODE="0755"
+
+# -----------------------------------------
+# Configurações de gravação das imagens ISO.
+# Velocidade de gravação.
+# Se for midia RW, melhor usar 4.
+SPEED="4"
+
+# Gravador.
+REC_DEV="/dev/sr0"
+
+# Programa de gravacao.
+GRAVADOR="$(which wodim)"
+
+# Opcoes de gravacao.
+WODIM_OPTS="-dao -v"

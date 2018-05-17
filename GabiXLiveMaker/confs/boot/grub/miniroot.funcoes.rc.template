@@ -1,0 +1,482 @@
+#!/bin/sh
+#
+# Funcoes utilizadas pelo miniroot baseado em busybox (GRUB)
+#
+# Gabriel Marques
+# snortt@gmail.com 
+#
+# Seg Abr 18 10:37:01 BRT 2011
+#
+
+# Modulos iniciais a serem carregados
+MODULES="loop squashfs unionfs ext3 ext4 xfs sr_mod usbcore hid usbhid \
+		 ehci_hcd ohci_hcd usb-storage uas libata ata_piix sd_mod scsi_mod"
+
+# Possiveis candidatos a unidade de CD-ROM
+#CDROMDEV="hda hdb hdc sda sdb sdc sr0 sr1 sr2 sr3"
+# Graças ao MDEV ;-) ...
+CDROMDEV="/dev/cdrom"
+
+# raiz do cdrom
+cdromroot="/cdrom"
+# base na raiz do cdrom
+cdrombase="${cdromroot}/base"
+# Arquivo que contem o sistema real, em squashfs
+base="sistema"
+# Arquivo que contem os modulos adicionais do kernel, em squashfs
+mods="modulos"
+# Arquivo que contem firmware utilizados pelo kernel, em squashfs
+fmwr="firmware"
+# Arquivo que contem headers utilizados pelo kernel, em squashfs
+khdr="headers"
+# Arquivo que contem includes utilizados pelo kernel, em squashfs
+kincludes="includes"
+
+# ---------------------------
+# Diretórios na área estática. Para facilitar nos testes e no uso geral.
+STATIC_BASE="/static"
+STATIC_MODS="${STATIC_BASE}/lib/modules/"
+STATIC_HDR="${STATIC_BASE}/usr/src/"
+STATIC_INC="${STATIC_BASE}/usr/include/"
+STATIC_FIRMWARE="${STATIC_BASE}/lib/firmware/"
+# ---------------------------
+# A mesma coisa, porém para local alternativo. 
+# Algum linux já instalado localmente.
+ALTER_STATIC_BASE="/mnt"
+ALTER_STATIC_MODS="${ALTER_STATIC_BASE}/lib/modules/"
+ALTER_STATIC_HDR="${ALTER_STATIC_BASE}/usr/src/"
+ALTER_STATIC_INC="${ALTER_STATIC_BASE}/usr/include/"
+ALTER_STATIC_FIRMWARE="${ALTER_STATIC_BASE}/lib/firmware/"
+
+# Arquivo de controle de erros
+# Precisamos dele porque os exports de subshells nao sobrescrevem os de nivel acima
+# ERRFILE = 0 : nao houve erro
+# ERRFILE = 1 : houve erro
+ERRFILE="/tmp/error.tmp"
+echo "0" > $ERRFILE
+
+# Carrega o sistema de cores
+# É importante ler o arquivo de cores para entender os padrão usado nas mensagens.
+# Isso também vai facilitar sua vida, se desejar trocar as cores do sistema.
+if [ -f /etc/cores.defs ]; then
+    . /etc/cores.defs
+fi
+
+# Esta funcao `parseia` a linha de comando de boot do kernel
+# $1 e o valor que voce procura
+# $2 e a variavel que sera inicializada com 1, caso $1 seja encontrado
+# Se $1 for "root", "restore" ou "home", esta funcao procura pelo dispositivo 
+# especificado e exporta uma variavel de acordo.
+# 
+# Isso é utilizado para manipular as operacoes de boot:
+# * Inicializar em sistema raiz alternativo
+# * Definir o home do usuario em outro local (um disco, talvez?)
+# * Recuperar configuracoes previamente armazenadas em um arquivo 
+# * Inicializar um linux local
+# * Determinar configuração de IP
+# * Solicitar carga de módulos adicionais
+#
+parse_cmd_line() {
+    for field in $CMDLINE
+    do 
+        if echo "$field" | grep "${1}" >/dev/null 2>&1
+        then
+            # Encontramos um pedido de var= na linha de comandos?
+            # Se sim, entao salve-o em uma variavel!
+            case "$1" in 
+                "root") export ROOTDEV=$(echo $field  | awk -F "=" '{print $2}') ;;
+                "restore") export RESTOREDEV=$(echo $field  | awk -F "=" '{print $2}') ;;                
+                "home") export HOMEDEV=$(echo $field  | awk -F "=" '{print $2}') ;;             
+                "ip_config") export IP_CONFIG=$(echo ${CMDLINE#*ip_config} | cut -d "\"" -f2 | cut -d " " -f1)
+                            # Se o IP for estatico, vamos ver se foi passado.
+                             if [ "$IP_CONFIG" == "static" ]; then
+                                export IP_STATIC=$(echo ${CMDLINE#*ip_config} | cut -d "\"" -f2 | cut -d " " -f2) 
+                                export NET_MASK=$(echo ${CMDLINE#*ip_config} | cut -d "\"" -f2 | cut -d " " -f3) 
+                                export NET_DNS=$(echo ${CMDLINE#*ip_config} | cut -d "\"" -f2 | cut -d " " -f4) 
+                                export DFGW=$(echo ${CMDLINE#*ip_config} | cut -d "\"" -f2 | cut -d " " -f5) 
+
+                                # Se o usuario pular algum dos valores, é óbvio que a configuração 
+                                # da rede vai ficar toda detonada com os valores abaixo. 
+                                # Mas ainda assim, vamos usar valores comuns para 
+                                # evitar problemas na inicialização do Debian.
+                                if [ -z "$IP_STATIC" ]; then export IP_STATIC="10.0.0.1"; fi
+                                if [ -z "$NET_MASK" ]; then export NET_MASK="255.0.0.0"; fi
+                                if [ -z "$NET_DNS"  ]; then export NET_DNS="10.0.0.100"; fi
+                                if [ -z "$DFGW" ]; then export DFGW="10.0.0.254"; fi
+
+                             fi
+                             ;;
+                # Lembre-se de que modulos="m1 m2 ...".    
+                "modulos") export MODS_CONFIG=$(echo ${CMDLINE#*modulos} | cut -d "\"" -f2) ;;
+            esac
+            export ${2}="1"
+            break
+        else
+            export ${2}="0"
+        fi
+    done
+}
+
+# Funcao que executa um shell em um tty (e nao console)
+exec_shell() {
+	# Apenas para debug ...
+	# dmesg | grep -i usb 
+
+    # Vamos deixar o nome GabiX, pois é a base de toda essa parafernalha, né? ;-)
+    export PS1="${VERDE}GabiX${AMARELO}# ${RESET}"
+    exec setsid sh -c 'exec sh </dev/tty1 >/dev/tty1 2>&1'
+}
+
+# Funcao que imprime mensagens de sucesso
+printOK() {
+    echo -e "$@ ${ADERECO}[${ACERTO}OK${ADERECO}]${RESET}"
+}
+
+# Funcao que imprime mensagens de erro
+printError() {
+    echo -e "$@ ${ADERECO}[${ERRO}Erro${ADERECO}]${RESET}"
+}
+
+# Funcao que imprime mensagens de aviso
+printWarn() {
+    echo -e "$@ ${ADERECO}[${AVISO}Aviso${ADERECO}]${RESET}"
+}
+
+# Funcao que imprime mensagens
+# Se receber 1 em $1, imprime mensagem extendida ("*** TEXTO ***").
+# Do contrário, imprime mensagem comum ("TEXTO").
+printMsg() {
+    if [ "$1" == "1" ]; then
+        shift
+        echo -e "${ADERECO}*** ${TEXTO}$@ ${ADERECO}***${RESET}"
+    else
+        echo -e "${TEXTO}$@ ${RESET}"
+    fi 
+}
+
+# Funcao que carrega os modulos do kernel
+load_modules() {
+    printMsg " "
+    printMsg 1 "Carregando modulos."
+    for module in $@
+    do
+        printMsg "modulo ${ADERECO} :: ${MOD}$module"
+		#(modprobe $module > /dev/null 2>&1 && printOK) || (echo "1" > $ERRFILE && printError)
+		(modprobe $module > /dev/null 2>&1 && printOK || printError)
+    done
+
+    # Vamos ver se módulos adicionais foram solicitados.
+    parse_cmd_line "modulos" MODS_CONFIG_ON
+    if [ "$MODS_CONFIG_ON" -eq "1" ]; then
+        # Arquivo de log
+        modprobe_log_file="/tmp/modprobe.log"
+
+        printMsg " "
+        printMsg 1 "Carregando modulos adicionais, caso existam."
+        for modulo in $MODS_CONFIG
+        do 
+            modprobe $modulo &> $modprobe_log_file
+            file_size=$(stat -c %s $modprobe_log_file)
+            if [ "$file_size" -eq "0" ]; then 
+                printOK "${ADERECO} modulo : ${MOD} $modulo "
+            else
+                printWarn "${ADERECO} [modulo existe?] : ${MOD} $modulo "
+            fi
+        done
+        # Vamos limpar a bagunça
+        rm -f $modprobe_log_file
+    fi
+}
+
+# Funcao para veriricar se foi solicitado um shell
+# Se receber a string "monta_squashes", ela monta as imagens squashfs antes 
+# de executar o shell
+check_shell() {
+    parse_cmd_line "shell" SHELL
+    if [ "$SHELL" -eq "1" ]
+    then
+        if [ "$1" == "monta_squashes" ]; then
+            montar_squashes
+			unir_tudo
+			#printMsg "    Se desejar ir alem, tente ${AVISO}chroot /union /bin/bash${TEXTO} agora. ;-)"
+        fi 
+
+        printMsg " "
+        printMsg "${EXEC_SHELL}Executando Shell:"
+        printMsg " "
+        exec_shell
+    fi
+}
+
+# Funcao para localizar um CD-ROM
+find_cdrom() {
+#  	echo -en "${SEPARADOR}|${RESET}"
+#    for cdrom in $CDROMDEV
+#    do 
+    	echo -en "${DEV}$cdrom${SEPARADOR}|${RESET}"
+#    	if mount -t iso9660 /dev/${cdrom} ${cdromroot} > /dev/null 2>&1; then
+    	if mount -t iso9660 ${CDROMDEV} ${cdromroot}; > /dev/null 2>&1; then
+    		#printOK "\n${ADERECO}CD-ROM :: ${DEV}$cdrom ${ADERECO} :: "
+    		printOK "\n${ADERECO}CD-ROM :: ${CDROMDEV} ${ADERECO} :: "
+    		export found_cd="1"
+    		echo "0" > $ERRFILE
+    		break
+    	fi
+#    done
+}
+
+# Funcao para montagem dos sistemas de arquivos
+# $1 e o dispositivo
+# $2 e o ponto de montagem
+mountit() {
+    printMsg " "
+    printMsg 1 "Montando ${DEV}${1}"
+    (mount $1 $2 > /dev/null 2>&1 && printOK "${DEV}$1 ${ADERECO}:: ") || (echo "1" > $ERRFILE && printError)
+}
+
+# Funcao para mover os sistemas de arquivos para outro local
+# $1 representa o fs original
+# $2 respresenta o novo ponto de montagem   
+move_fs() {
+    printMsg 1 "Movendo ${DEV}${1}"  
+    (mount -n -o move $1 $2 > /dev/null 2>&1 && printOK "${DEV}$1 ${APONTADOR}-> ${DEV}${2} ${ADERECO}:: ") || (echo "1" > $ERRFILE && printError)
+}
+
+# Funcao para montar um home alternativo 
+# $1 define que o home sera montado no sistema do CD-ROM se for "static"
+# $1 define que o home sera montado no sistema local se for "mnt"
+# 
+check_home() {
+    # Verifica se tambem foi solicitado um HOME local 
+    parse_cmd_line "home" "HOME_LOCAL"   
+    if [ "$HOME_LOCAL" -eq "1" ]
+    then
+        printMsg " "
+        printMsg 1 "Usando HOME local em ${DEV}${HOMEDEV}"
+        mountit "$HOMEDEV" "/home"
+        if grep 0 $ERRFILE > /dev/null 2>&1; then
+            # Caso não exista um 'home' no local especificado, vamos criar o nosso!
+            # Assim, as configs do usuário já ficarão lá também ;-)
+	        if [ ! -d ${1}/home ]; then
+                printMsg " "
+                printMsg "${AVISO}${1}/home nao encontrado em ${DEV}${HOMEDEV}. Criando um ..."
+	        	(mkdir -p ${1}/home && printOK) || (echo "1" > $ERRFILE && printError)
+	        fi
+	        move_fs "/home" "${1}/home"
+		# Se o 'home' der errado, que tal executar um shell?
+		#else
+			#exec_shell
+	    fi
+    fi
+}
+
+# Funcao para veriricar se o IP deve ser estatico ou dinamico
+# Caso o usuario escolha IP estatico, IP_CONFIG sera static
+# Se ele optar por IP dinamico, IP_CONFIG sera dhcp
+# Se ele apagar a variavel ip_config da linha de comando do kernel, IP_CONFIG_ON
+# sera 0 e nao teremos configuracoes de rede.
+check_ip_config() {
+    parse_cmd_line "ip_config" "IP_CONFIG_ON"
+    if [ "$IP_CONFIG_ON" -eq "0" ]
+    then 
+        printMsg " "
+        printMsg "${AVISO}Sem configuracao de rede"
+    else
+        if [ "$IP_CONFIG" == "static" ]
+        then
+            printMsg " "
+            printMsg "Usando configuracao ${ADERECO}[${AVISO}ESTATICA${ADERECO}]${TEXTO} de rede"
+            printMsg "IP ${ADERECO}[${AVISO}${IP_STATIC}${ADERECO}]"
+            printMsg "Netmask ${ADERECO}[${AVISO}${NET_MASK}${ADERECO}]"
+            printMsg "DNS ${ADERECO}[${AVISO}${NET_DNS}${ADERECO}]"
+            printMsg "Gateway ${ADERECO}[${AVISO}${DFGW}${ADERECO}]"
+            (
+                cp /etc/interfaces.static /union/etc/network/interfaces 2> /dev/null
+                sed -i s/"_IP_STATIC_/${IP_STATIC}"/g /union/etc/network/interfaces 2> /dev/null  
+                sed -i s/"_NET_MASK_/${NET_MASK}"/g /union/etc/network/interfaces 2> /dev/null
+                sed -i s/"_NET_DNS_/${NET_DNS}"/g /union/etc/network/interfaces 2> /dev/null
+                sed -i s/"_DFGW_/${DFGW}"/g /union/etc/network/interfaces 2> /dev/null
+            ) && printOK || printError 
+        elif [ "$IP_CONFIG" == "dhcp" ]
+        then
+            printMsg " " 
+            printMsg "Usando configuracao ${ADERECO}[${AVISO}DINAMICA${ADERECO}]${TEXTO} de rede"
+            # Aqui o erro nao nos importa mais (ja vimos que o recurso funciona)            
+            cp /etc/interfaces.dhcp /union/etc/network/interfaces 2> /dev/null
+        fi
+    fi
+}
+   
+# Funcao para montar as imagens squashfs dos arquivos usados pelo kernel
+# $1 e a origem
+# $ e o ponto de montagem
+mountit_kernel_stuff() {
+    (mount -t squashfs "$1" "$2" -o loop > /dev/null 2>&1 && printOK) || (echo "1" > $ERRFILE && printError)
+}
+
+# Funcao para verificar se foi solicitada uma raiz alternativa na linha de comandos 
+check_root() {
+    parse_cmd_line "root" "ROOT_LOCAL"
+    if [ "$ROOT_LOCAL" -eq "1" ]
+    then
+        # Tenta montar o dispositivo raiz
+        printMsg " "
+        printMsg 1 "Solicitado BOOT com raiz em ${DEV}${ROOTDEV}"
+        mountit "${ROOTDEV}" "${ALTER_STATIC_BASE}"
+        
+        # Vamos ver se tambem foi solicitado um HOME alternativo
+        check_home "${ALTER_STATIC_BASE}"
+        
+        # Uma vez que estamos usando o kernel Linux do GabiX, sera necessario usar os modulos do mesmo kernel
+        # Vamos montar nossa imagem squashfs que contem os modulos adicionais do kernel
+        printMsg " "
+        printMsg 1 "Montando imagem de modulos do kernel"  
+        mountit_kernel_stuff "${cdrombase}/${mods}" "${ALTER_STATIC_MODS}"
+    
+        # Vamos montar nossa imagem squashfs que contem o firmware usado pelo kernel
+        printMsg " "
+        printMsg 1 "Montando imagem de firmware do kernel" 
+        mountit_kernel_stuff "${cdrombase}/${fmwr}" "${ALTER_STATIC_FIRMWARE}"
+        
+        # Vamos montar nossa imagem squashfs que contem os headers usados pelo kernel
+        printMsg " "
+        printMsg 1 "Montando imagem de headers do kernel"  
+        mountit_kernel_stuff "${cdrombase}/${khdr}" "${ALTER_STATIC_HDR}"
+
+        # Vamos montar nossa imagem squashfs que contem os includes usados pelo kernel
+        printMsg " "
+        printMsg 1 "Montando imagem de includes do kernel, caso existam." 
+	    if ls "${cdrombase}/${kincludes}" > /dev/null 2>&1 ;then
+			printMsg "Exite arquivo de includes, montando..."	
+	        mountit_kernel_stuff "${cdrombase}/${kincludes}" "${ALTER_STATIC_INC}"
+		else
+			printWarn "Este kernel nao possui includes"
+		fi
+    
+        # Antes de passar o controle, vamos ver se foi solicitado um shell. Quem sabe? ;-)
+        check_shell
+
+        # Passa o controle para o sistema na raiz escolhida, caso nao haja erros
+        if grep 0 $ERRFILE > /dev/null 2>&1; then
+            # Move os sistemas de arquivos virtuais para o novo dispositivo raiz somente se tudo deu certo
+            printMsg " "
+            printMsg 1 "Movendo sistemas de arquivos virtuais para ${DEV}${ROOTDEV}"
+            move_fs "/sys" "${ALTER_STATIC_BASE}/sys"
+            move_fs "/proc" "${ALTER_STATIC_BASE}/proc"
+
+            printMsg " "
+            printMsg 1 "Executando sistema em ${DEV}${ROOTDEV}"
+            printMsg " "
+            printMsg 1 "${ACERTO}Iniciando"
+            exec switch_root -c /dev/console ${ALTER_STATIC_BASE} "/sbin/init"
+        else
+            printMsg " "
+            printMsg 1 "${ERRO}Houve um problema ao carregar o sistema. :-("
+            printMsg " "
+        	exec_shell
+        fi
+    fi
+}
+
+# ---------------------------------------------------------
+# Funções de encapsulamento das operações de inicialização.
+# ---------------------------------------------------------
+# 
+# Esta função utiliza as funções de montagem para encapsular as operações executadas durante o boot.
+montar_squashes() {
+    # Vamos montar o nosso sistema squashfs na area estatica 
+    printMsg " "
+    printMsg 1 "Montando imagem squashfs do sistema"
+    mountit_kernel_stuff "${cdrombase}/${base}" "$STATIC_BASE"
+
+    # Aqui temos dois caminhos:
+    # 1-) Sua imagem SQUASHFS do sistema foi encontrada e montada! 
+    #     Prossiga e monte as imagens dos módulos, firmware e headers
+    # 2-) Sua imagem SQUASHFS do sistema não foi encontrada/montada!
+    #     Ainda assim, vc pode querer montar as demais imagens.
+    #     Assim, podemos incluir um teste para criar os diretórios ausentes pela não montagem 
+    #     da imagem SQUASHFS do sistema.
+    # 
+    # Eu optei por seguir o segundo caminho.
+    # 
+    # Vamos montar nossa imagem squashfs que contem os modulos adicionais do kernel
+    printMsg " " 
+    printMsg 1 "Montando imagem de modulos do kernel"  
+    if [ ! -d "$STATIC_MODS" ]; then
+        printMsg "${ADERECO}Criando ${STATIC_MODS} nao funcional [${ERRO}!${ADERECO}]"
+        mkdir -p "$STATIC_MODS"
+    fi
+    # mountit_kernel_stuff "/cdrom/base/${mods}" "/static/lib/modules/"
+    mountit_kernel_stuff "${cdrombase}/${mods}" "${STATIC_MODS}"
+    
+    # Vamos montar nossa imagem squashfs que contem o firmware usado pelo kernel
+    printMsg " "
+    printMsg 1 "Montando imagem de firmware do kernel"  
+    if [ ! -d "$STATIC_FIRMWARE" ]; then
+        printMsg "${ADERECO}Criando ${STATIC_FIRMWARE} nao funcional [${ERRO}!${ADERECO}]"
+        mkdir -p "$STATIC_FIRMWARE"
+    fi
+    # mountit_kernel_stuff "/cdrom/base/${fmwr}" "/static/lib/firmware/"
+    mountit_kernel_stuff "${cdrombase}/${fmwr}" "${STATIC_FIRMWARE}"
+    
+    # Vamos montar nossa imagem squashfs que contem os headers usados pelo kernel
+    printMsg " "
+    printMsg 1 "Montando imagem de headers do kernel, caso existam."  
+    if [ ! -d "$STATIC_HDR" ]; then
+        printMsg "${ADERECO}Criando ${STATIC_HDR} nao funcional [${ERRO}!${ADERECO}]"
+        mkdir -p "$STATIC_HDR"
+    fi 
+    mountit_kernel_stuff "${cdrombase}/${khdr}" "${STATIC_HDR}"
+
+    # Vamos montar nossa imagem squashfs que contem os includes usados pelo kernel
+    printMsg " "
+    printMsg 1 "Montando imagem de includes do kernel, caso existam."  
+    if [ ! -d "$STATIC_INC" ]; then
+        printMsg "${ADERECO}Criando ${STATIC_INC} nao funcional [${ERRO}!${ADERECO}]"
+        mkdir -p "$STATIC_INC"
+    fi 
+	if ls "${cdrombase}/${kincludes}" > /dev/null 2>&1 ;then
+		printMsg "Exite arquivo de includes, montando..."	
+	    mountit_kernel_stuff "${cdrombase}/${kincludes}" "${STATIC_INC}"
+	else
+		printWarn "Este kernel nao possui includes"
+	fi
+    
+    
+    # Isso aqui permite que o BOOT fique visivel de dentro do sistema final
+    # Precisa ser --bind porque /cdrom/boot nao e um pto de montagem a ser realocado (mount --help, ;-P )
+    printMsg " "
+    printMsg 1 "Juntando arquivos do kernel ao sistema final"
+    if [ ! -d "${STATIC_BASE}/boot" ]; then
+        printMsg "${ADERECO}Criando ${STATIC_BASE}/boot nao funcional [${ERRO}!${ADERECO}]"
+        mkdir -p "$STATIC_BASE/boot"
+    fi    
+    (mount -n --bind /cdrom/boot ${STATIC_BASE}/boot > /dev/null 2>&1 && printOK) || (Erro="1" && printError)
+
+# ############ TESTE ---------------
+    # Isto fará com que os estágios de montagens fiquem acessíveis do sistema final.
+#    (mount -n --bind /static ${STATIC_BASE}/static > /dev/null 2>&1 && printOK) || (Erro="1" && printError)
+#    (mount -n --bind /union ${STATIC_BASE}/union > /dev/null 2>&1 && printOK) || (Erro="1" && printError)
+#    (mount -n --bind /dynamic ${STATIC_BASE}/dynamic > /dev/null 2>&1 && printOK) || (Erro="1" && printError)
+# ############ TESTE ---------------
+    
+    # Isso aqui permite que o CD-ROM fique visivel de dentro do sistema final
+    printMsg " "
+    printMsg 1 "Juntando CD-ROM ao sistema final"
+    if [ ! -d "${STATIC_BASE}/cdrom" ]; then
+        printMsg "${ADERECO}Criando ${STATIC_BASE}/cdrom nao funcional [${ERRO}!${ADERECO}]"
+        mkdir -p "$STATIC_BASE/cdrom"
+    fi 
+    # Macete feio, para ficar bonito! ;-)
+    # printMsg " "
+    move_fs "${cdromroot}" "${STATIC_BASE}/cdrom"
+}
+
+# Função para encapsular a união das áreas estática e dinâmica
+unir_tudo() {
+    printMsg " "
+    printMsg 1 "Unindo area dinamica e estatica"
+    printMsg "${DEV}static ${AVISO}+ ${DEV}dynamic ${AVISO}= ${DEV}union"
+    (mount -t unionfs unionfs /union -o dirs=/dynamic=rw:/static=ro > /dev/null 2>&1 && printOK) || (Erro="1" && printError)
+}
+

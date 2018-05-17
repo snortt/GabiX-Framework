@@ -1,0 +1,23 @@
+# ----------------------
+# Configurações de sistema.
+# Vamos dizer ao scritp onde está a raiz do miniroot (quem dará origem ao initrd).
+MINIROOTDIR="${BASEDIR_GABIX}/miniroot"
+
+# Arquivos usados para criar o init do miniroot
+# x86 e X86_64
+MINIROOT_INIT_TEMPLATE_GRUB="${CONFS_GRUB_DIR}/miniroot.init.template"
+MINIROOT_INIT_TEMPLATE_ISOLINUX="${CONFS_ISOLINUX_DIR}/miniroot.init.template"
+# ARM 
+MINIROOT_INIT_TEMPLATE_ARM="${ARM_BOOT_CFG}/miniroot.init.template.armel"
+
+# Arquivos usados para criar /etc/funcoes.rc, de acordo com a arquitetura
+# x86 e X86_64
+MINIROOT_FUNCOES_TEMPLATE_GRUB="${CONFS_GRUB_DIR}/miniroot.funcoes.rc.template"
+MINIROOT_FUNCOES_TEMPLATE_ISOLINUX="${CONFS_ISOLINUX_DIR}/miniroot.funcoes.rc.template"
+# ARM 
+MINIROOT_FUNCOES_TEMPLATE_ARM="${ARM_BOOT_CFG}/miniroot.funcoes.rc.template.armel"
+
+# Arquivo de inicialização e funções do miniroot
+MINIROOT_INIT="${MINIROOTDIR}/init"
+MINIROOT_FUNCOES="${MINIROOTDIR}/etc/funcoes.rc"
+

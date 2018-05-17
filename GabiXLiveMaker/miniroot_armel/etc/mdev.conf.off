@@ -1,0 +1,109 @@
+# 
+# This is a sample mdev.conf.
+#
+
+# Devices:
+# Syntax: %s %d:%d %s
+# devices user:group mode
+
+# null does already exist; therefore ownership has to be changed with command
+null	0:0 0666	@chmod 666 $MDEV
+zero	0:0 0666
+grsec	0:0 0660
+full	0:0 0666
+
+random	0:0 0666
+urandom	0:0 0444
+hwrandom 0:0 0660
+
+# console does already exist; therefore ownership has to be changed with command
+#console	0:5 0600	@chmod 600 $MDEV && mkdir -p vc && ln -sf ../$MDEV vc/0
+console 0:5 0600 @mkdir -pm 755 fd && cd fd && for x in 0 1 2 3 ; do ln -sf /proc/self/fd/$x $x; done
+
+
+fd0	0:25 0660
+kmem	0:0 0640
+mem	0:0 0640
+port	0:0 0640
+ptmx	0:5 0666
+
+# ram.*
+ram([0-9]*)	0:6 0660 >rd/%1
+loop([0-9]+)	0:6 0660 >loop/%1
+sd[a-z].*	0:6 0660 */lib/mdev/usbdisk_link
+hd[a-z][0-9]*	0:6 0660 */lib/mdev/ide_links
+md[0-9]		0:6 0660
+
+tty		0:5 0666
+tty[0-9]	0:0 0600
+tty[0-9][0-9]	0:5 0660
+ttyS[0-9]*	0:10 0660
+pty.*		0:5 0660
+vcs[0-9]*	0:5 0660
+vcsa[0-9]*	0:5 0660
+
+
+ttyLTM[0-9]	0:20 0660 @ln -sf $MDEV modem
+ttySHSF[0-9]	0:20 0660 @ln -sf $MDEV modem
+slamr		0:20 0660 @ln -sf $MDEV slamr0
+slusb		0:20 0660 @ln -sf $MDEV slusb0
+fuse		0:0  0666
+
+# dri device
+card[0-9]	0:44 0660 =dri/
+
+# alsa sound devices and audio stuff
+pcm.*		0:29 0660	=snd/
+control.*	0:29 0660	=snd/
+midi.*		0:29 0660	=snd/
+seq		0:29 0660	=snd/
+timer		0:29 0660	=snd/
+
+adsp		0:29 0660 >sound/
+audio		0:29 0660 >sound/
+dsp		0:29 0660 >sound/
+mixer		0:29 0660 >sound/
+sequencer.*	0:29 0660 >sound/
+
+# misc stuff
+agpgart		0:0 0660  >misc/
+psaux		0:0 0660  >misc/
+rtc		0:0 0664  >misc/
+
+# input stuff
+event[0-9]+	0:0 0640 =input/
+mice		0:0 0640 =input/
+mouse[0-9]	0:0 0640 =input/
+ts[0-9]		0:0 0600 =input/
+
+# v4l stuff
+vbi[0-9]	0:44 0660 >v4l/
+video[0-9]	0:44 0660 >v4l/
+
+# dvb stuff
+dvb.*		0:44 0660 */lib/mdev/dvbdev
+
+# load drivers for usb devices
+usbdev[0-9].[0-9]	0:0 0660 */lib/mdev/usbdev
+usbdev[0-9].[0-9]_.*	0:0 0660
+
+# net devices
+tun[0-9]*	0:0 0600 =net/
+tap[0-9]*	0:0 0600 =net/
+
+# zaptel devices
+zap(.*)		0:20 0660 =zap/%1
+dahdi!(.*)	0:20 0660 =dahdi/%1
+
+# raid controllers
+cciss!(.*)	0:6 0660 =cciss/%1
+ida!(.*)	0:6 0660 =ida/%1
+rd!(.*)		0:6 0660 =rd/%1
+
+sr[0-9]		0:24 0660 @ln -sf $MDEV cdrom 
+
+# hpilo
+hpilo!(.*)	0:0 0660 =hpilo/%1
+
+# xen stuff
+xvd[a-z]	0:0 0660 */lib/mdev/xvd_links

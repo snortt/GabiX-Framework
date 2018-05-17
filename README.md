@@ -1,0 +1,2 @@
+# GabiX-Framework
+A framework I wrote back in 2011 that is capable of creating modular Linux live systems. It is Makefile and config ASCII files based, and also use Debian 5 packages and a custom 3.x kernel. You can then choose from x86, x86_64 and ARM, generate an ISO image that uses GRUB or Isolinux. It also supports Nvidia drivers or Nouveau (that's configurable). The pack encloses a full manual file.
